@@ -1,15 +1,21 @@
 #!/usr/bin/env node
 
 import http from 'node:http';
-import { spawn } from 'node:child_process';
-import { readFileSync } from 'node:fs';
 
 const PORT = Number.parseInt(process.env.PORT || '3456', 10);
 const HOST = process.env.HOST || '127.0.0.1';
 const TOKEN = process.env.EXECUTOR_TOKEN || '';
-const ALLOWLIST_FILE = process.env.ALLOWLIST_FILE || './commands.json';
-const TIMEOUT_MS = Number.parseInt(process.env.COMMAND_TIMEOUT_MS || '300000', 10);
 
-function loadCommands() {
-  try {
-    const parsed = JSON.parse(readFileSync(ALLOW
+function sendJson(res, statusCode, payload) {
+  res.writeHead(statusCode, { 'content-type': 'application/json; charset=utf-8' });
+  res.end(JSON.stringify(payload, null, 2));
+}
+
+async function readJson(req) {
+  const chunks = [];
+  for await (const chunk of req) chunks.push(chunk);
+  if (chunks.length === 0) return {};
+  return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+}
+
+function is
